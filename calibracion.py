@@ -4,8 +4,8 @@
 import cv2
 import numpy as np
 
-def calibrar():
-    img = cv2.imread("img_calib/pattern.png")
+def calibrar(img_str):
+    img = cv2.imread(img_str)
 
     # Comprobamos que la imagen se ha podido leer
     if img is None:
@@ -13,17 +13,18 @@ def calibrar():
         quit()
 
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    img_gray = np.float32(img_gray)
 
 
-    blockSize = 2 
-    apertureSize = 3 
-    k = 0.04 
+    ret, corners = cv2.findChessboardCorners(img_gray, (9,6), None)
+    
+    if ret:
 
-    dst = cv2.cornerHarris(img_gray, blockSize, apertureSize, k)
+        img = cv2.drawChessboardCorners(img, (9,6), corners, ret)
 
-    cv2.imshow("Prueba",dst)
-    cv2.waitKey()
+        cv2.imshow("Esquinas",img)
+        cv2.waitKey(0)
 
 if __name__ == '__main__':
-    calibrar()
+    calibrar("img_calib/pattern.png")
+    calibrar("img_calib/pattern2.png")
+    calibrar("img_calib/pattern3.png")
