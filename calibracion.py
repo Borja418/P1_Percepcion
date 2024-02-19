@@ -5,15 +5,12 @@ import cv2
 import numpy as np
 
 def calibrar():
-    img = cv2.imread(args.imagen)
+    img = cv2.imread("img_calib/pattern.png")
 
     # Comprobamos que la imagen se ha podido leer
     if img is None:
         print('Error al cargar la imagen')
         quit()
-
-    # Pasamos la imagen a escala de grises, y despu茅s a float32
-    #聽TODO (guardar en img_gray)
 
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img_gray = np.float32(img_gray)
@@ -25,7 +22,8 @@ def calibrar():
 
     dst = cv2.cornerHarris(img_gray, blockSize, apertureSize, k)
 
-    cv2.imshow(dst)
+    cv2.imshow("Prueba",dst)
+    cv2.waitKey()
 
 if __name__ == '__main__':
     calibrar()
