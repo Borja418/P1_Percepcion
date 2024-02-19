@@ -3,28 +3,34 @@
 
 import cv2
 import numpy as np
+import os
 
-def calibrar(img_str):
-    img = cv2.imread(img_str)
+def calibrar():
 
-    # Comprobamos que la imagen se ha podido leer
-    if img is None:
-        print('Error al cargar la imagen')
-        quit()
-
-    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-
-    ret, corners = cv2.findChessboardCorners(img_gray, (9,6), None)
+    imgs_name = [f for f in os.listdir("img_calib") if f.endswith('.png')]
     
-    if ret:
+    for img_name in imgs_name:
 
-        img = cv2.drawChessboardCorners(img, (9,6), corners, ret)
+        img = cv2.imread("img_calib/"+img_name)
 
-        cv2.imshow("Esquinas",img)
-        cv2.waitKey(0)
+        # Comprobamos que la imagen se ha podido leer
+        if img is None:
+            print('Error al cargar la imagen')
+            quit()
+
+        img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+
+        ret, corners = cv2.findChessboardCorners(img_gray, (9,6), None)
+        print(corners)
+        if ret:
+
+            img = cv2.drawChessboardCorners(img, (9,6), corners, ret)
+
+            cv2.imshow("Esquinas",img)
+            cv2.waitKey(0)
+
+    print(f"Numero de imagenes para la calibracion: {len(imgs_name)}")
 
 if __name__ == '__main__':
-    calibrar("img_calib/pattern.png")
-    calibrar("img_calib/pattern2.png")
-    calibrar("img_calib/pattern3.png")
+    calibrar()
