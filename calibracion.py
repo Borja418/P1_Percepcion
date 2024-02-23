@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 import os
 
-LONGITUD = 2
+LONGITUD = 3.6
 
 
 def calibrar():
