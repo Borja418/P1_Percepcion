@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
     mtx, dist, rvecs, tvecs = calibrar()
 
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture('WIN_20240226_16_45_15_Pro.mp4')
 
     while(True):
         ret, img = cap.read()
