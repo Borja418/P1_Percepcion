@@ -4,6 +4,8 @@
 import cv2
 import numpy as np
 import os
+import letras
+import copy
 
 LONGITUD = 3.6
 
@@ -51,6 +53,80 @@ def calibrar():
 
     return mtx, dist, rvecs, tvecs
 
+def DibujarNombres(img, rvecs_img, tvecs_img, newcameramtx, dist):
+    
+
+    letra_B = cv2.projectPoints(letras.B, rvecs_img, tvecs_img, newcameramtx, dist)
+    Borja_pts = []
+
+    for element in letra_B[0]:
+        
+        Borja_pts.append(element.ravel().astype(int))
+
+    img = cv2.line(img, Borja_pts[0], Borja_pts[1], (0,255,0), 3)
+    img = cv2.line(img, Borja_pts[1], Borja_pts[2], (0,255,0), 3)
+    img = cv2.line(img, Borja_pts[2], Borja_pts[3], (0,255,0), 3)
+    img = cv2.line(img, Borja_pts[3], Borja_pts[4], (0,255,0), 3)
+    img = cv2.line(img, Borja_pts[4], Borja_pts[5], (0,255,0), 3)
+    img = cv2.line(img, Borja_pts[4], Borja_pts[6], (0,255,0), 3)
+    img = cv2.line(img, Borja_pts[6], Borja_pts[7], (0,255,0), 3)
+    img = cv2.line(img, Borja_pts[7], Borja_pts[0], (0,255,0), 3)
+    
+    letra_O = copy.deepcopy(letras.O)
+    for point in letra_O:
+        point += [3,0,0]
+
+
+    letra_O = cv2.projectPoints(letra_O, rvecs_img, tvecs_img, newcameramtx, dist)
+    Borja_pts = []
+
+    for element in letra_O[0]:
+        
+        Borja_pts.append(element.ravel().astype(int))
+
+    img = cv2.line(img, Borja_pts[0], Borja_pts[1], (0,255,0), 3)
+    img = cv2.line(img, Borja_pts[1], Borja_pts[2], (0,255,0), 3)
+    img = cv2.line(img, Borja_pts[2], Borja_pts[3], (0,255,0), 3)
+    img = cv2.line(img, Borja_pts[3], Borja_pts[0], (0,255,0), 3)
+
+    letra_R = copy.deepcopy(letras.R)
+    for point in letra_R:
+        point += [6,0,0]
+
+    letra_R = cv2.projectPoints(letra_R, rvecs_img, tvecs_img, newcameramtx, dist)
+    Borja_pts = []
+
+    for element in letra_R[0]:
+        
+        Borja_pts.append(element.ravel().astype(int))
+
+    img = cv2.line(img, Borja_pts[0], Borja_pts[1], (0,255,0), 3)
+    img = cv2.line(img, Borja_pts[1], Borja_pts[2], (0,255,0), 3)
+    img = cv2.line(img, Borja_pts[2], Borja_pts[3], (0,255,0), 3)
+    img = cv2.line(img, Borja_pts[3], Borja_pts[4], (0,255,0), 3)
+    img = cv2.line(img, Borja_pts[5], Borja_pts[6], (0,255,0), 3)
+
+    letra_J = copy.deepcopy(letras.J)
+    for point in letra_J:
+        point += [9,0,0]
+
+    letra_J = cv2.projectPoints(letra_J, rvecs_img, tvecs_img, newcameramtx, dist)
+    Borja_pts = []
+
+    for element in letra_J[0]:
+        
+        Borja_pts.append(element.ravel().astype(int))
+
+    img = cv2.line(img, Borja_pts[0], Borja_pts[1], (0,255,0), 3)
+    img = cv2.line(img, Borja_pts[2], Borja_pts[3], (0,255,0), 3)
+    img = cv2.line(img, Borja_pts[3], Borja_pts[4], (0,255,0), 3)
+    img = cv2.line(img, Borja_pts[4], Borja_pts[5], (0,255,0), 3)
+
+
+    return img
+
+
+
 if __name__ == '__main__':
 
     mtx, dist, rvecs, tvecs = calibrar()
@@ -81,34 +157,8 @@ if __name__ == '__main__':
             img = cv2.drawChessboardCorners(img, (9,6), corners2, ret)
 
             ret, rvecs_img, tvecs_img = cv2.solvePnP(objpoints, corners2, newcameramtx, dist)
-            
-            rotation_matrix, _ = cv2.Rodrigues(rvecs_img)
-            
-            transformation_matrix = np.c_[rotation_matrix, tvecs_img]
 
-            points = np.float32([[0,0,0], [LONGITUD*4,0,-10], [LONGITUD*8,0,0]]).reshape(-1,3)
-            img_points = cv2.projectPoints(points, rvecs_img, tvecs_img, newcameramtx, dist)
-
-            coordinates = []
-
-            for element in img_points[0]:
-                
-                coordinates.append(element.ravel().astype(int))
-
-            """ coordinates = np.matmul(newcameramtx, np.matmul(transformation_matrix, np.transpose(np.array([0,0,0,1]))))
-            coordinates2 = np.matmul(newcameramtx, np.matmul(transformation_matrix, np.transpose(np.array([LONGITUD*4,0,-10,1]))))
-            coordinates3 = np.matmul(newcameramtx, np.matmul(transformation_matrix, np.transpose(np.array([LONGITUD*8,0,0,1]))))
-
-            coordinates = coordinates/coordinates[2]
-            coordinates2 = coordinates2/coordinates2[2]
-            coordinates3 = coordinates3/coordinates3[2]
-
-            coordinates = coordinates.astype(int)
-            coordinates2 = coordinates2.astype(int)
-            coordinates3 = coordinates3.astype(int) """
-
-            img = cv2.line(img, coordinates[0], coordinates[1], (0,255,0), 3)
-            img = cv2.line(img, coordinates[1], coordinates[2], (0,255,0), 3)
+            img = DibujarNombres(img, rvecs_img, tvecs_img, newcameramtx, dist)
 
             cv2.imshow('frame',img)
 
