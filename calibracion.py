@@ -86,7 +86,16 @@ if __name__ == '__main__':
             
             transformation_matrix = np.c_[rotation_matrix, tvecs_img]
 
-            coordinates = np.matmul(newcameramtx, np.matmul(transformation_matrix, np.transpose(np.array([0,0,0,1]))))
+            points = np.float32([[0,0,0], [LONGITUD*4,0,-10], [LONGITUD*8,0,0]]).reshape(-1,3)
+            img_points = cv2.projectPoints(points, rvecs_img, tvecs_img, newcameramtx, dist)
+            print(tuple(img_points[0][0].ravel()))
+            coordinates = []
+
+            for element in img_points[0]:
+                print(element)
+                coordinates.append(int(tuple(element[0].ravel())))
+
+            """ coordinates = np.matmul(newcameramtx, np.matmul(transformation_matrix, np.transpose(np.array([0,0,0,1]))))
             coordinates2 = np.matmul(newcameramtx, np.matmul(transformation_matrix, np.transpose(np.array([LONGITUD*4,0,-10,1]))))
             coordinates3 = np.matmul(newcameramtx, np.matmul(transformation_matrix, np.transpose(np.array([LONGITUD*8,0,0,1]))))
 
@@ -96,10 +105,10 @@ if __name__ == '__main__':
 
             coordinates = coordinates.astype(int)
             coordinates2 = coordinates2.astype(int)
-            coordinates3 = coordinates3.astype(int)
+            coordinates3 = coordinates3.astype(int) """
 
-            img = cv2.line(img, (coordinates[0], coordinates[1]), (coordinates2[0], coordinates2[1]), (0,255,0), 3)
-            img = cv2.line(img, (coordinates2[0], coordinates2[1]), (coordinates3[0], coordinates3[1]), (0,255,0), 3)
+            img = cv2.line(img, coordinates[0], coordinates[1], (0,255,0), 3)
+            img = cv2.line(img, coordinates[1], coordinates[2], (0,255,0), 3)
 
             cv2.imshow('frame',img)
 
