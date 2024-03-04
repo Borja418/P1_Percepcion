@@ -88,12 +88,12 @@ if __name__ == '__main__':
 
             points = np.float32([[0,0,0], [LONGITUD*4,0,-10], [LONGITUD*8,0,0]]).reshape(-1,3)
             img_points = cv2.projectPoints(points, rvecs_img, tvecs_img, newcameramtx, dist)
-            print(tuple(img_points[0][0].ravel()))
+
             coordinates = []
 
             for element in img_points[0]:
-                print(element)
-                coordinates.append(int(tuple(element[0].ravel())))
+                
+                coordinates.append(element.ravel().astype(int))
 
             """ coordinates = np.matmul(newcameramtx, np.matmul(transformation_matrix, np.transpose(np.array([0,0,0,1]))))
             coordinates2 = np.matmul(newcameramtx, np.matmul(transformation_matrix, np.transpose(np.array([LONGITUD*4,0,-10,1]))))
