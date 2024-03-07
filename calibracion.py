@@ -131,9 +131,9 @@ if __name__ == '__main__':
 
     mtx, dist, rvecs, tvecs = calibrar()
 
-    cap = cv2.VideoCapture('WIN_20240226_16_45_15_Pro.mp4')
+    cap = cv2.VideoCapture('VideoPrueba.mp4')
 
-    while(True):
+    while(cap.isOpened()):
         ret, img = cap.read()
         
         img = cv2.resize(img, (1200,675))
@@ -160,6 +160,8 @@ if __name__ == '__main__':
 
             img = DibujarNombres(img, rvecs_img, tvecs_img, newcameramtx, dist)
 
+            cv2.imshow('frame',img)
+        else:
             cv2.imshow('frame',img)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
