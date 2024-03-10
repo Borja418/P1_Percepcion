@@ -6,6 +6,7 @@ import numpy as np
 import os
 import letras
 import copy
+import time
 
 LONGITUD = 3.6
 
@@ -21,9 +22,9 @@ def calibrar():
     imgs_name = [f for f in os.listdir("Real_Imgs") if f.endswith('.jpg')]
     
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
-
+    i = 0
     for img_name in imgs_name:
-
+        i+=1
         img = cv2.imread("Real_Imgs/"+img_name)
         # Comprobamos que la imagen se ha podido leer
         if img is None:
@@ -46,12 +47,14 @@ def calibrar():
 
             """ cv2.imshow("Esquinas",img)
             cv2.waitKey(0) """
+        if i == 24:
+            break
     
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints_array, imgpoints_array, img_gray.shape[::-1], None, None)
+    print(ret)
+    print(f"Numero de imagenes para la calibracion: {i}")
 
-    print(f"Numero de imagenes para la calibracion: {len(imgs_name)}")
-
-    return mtx, dist, rvecs, tvecs
+    return mtx, dist
 
 def DibujarNombres(img, rvecs_img, tvecs_img, newcameramtx, dist):
     
@@ -129,44 +132,53 @@ def DibujarNombres(img, rvecs_img, tvecs_img, newcameramtx, dist):
 
 if __name__ == '__main__':
 
-    mtx, dist, rvecs, tvecs = calibrar()
+    mtx, dist = calibrar()
+    newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (1200,675), 1, (1200,675))
+
+    objpoints = np.zeros((9*6,3),np.float32)
+    objpoints[:,:2] = np.mgrid[0:9,0:6].T.reshape(-1,2)
+    objpoints = objpoints*LONGITUD
 
     cap = cv2.VideoCapture('VideoPrueba.mp4')
-
+    inicio = time.time()
     while(cap.isOpened()):
+        
         ret, img = cap.read()
         
-        img = cv2.resize(img, (1200,675))
-
-        h,  w = img.shape[:2]
-        newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (w,h), 1, (w,h))
-
-        img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-        ret, corners = cv2.findChessboardCorners(img_gray, (9,6), None)
-            
         if ret:
+            img = cv2.resize(img, (1200,675))            
+            img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-            objpoints = np.zeros((9*6,3),np.float32)
-            objpoints[:,:2] = np.mgrid[0:9,0:6].T.reshape(-1,2)
-            objpoints = objpoints*LONGITUD
+            inicio_chessboard = time.time()
+            ret, corners = cv2.findChessboardCorners(img_gray, (9,6), None)
+            final_chessboard = time.time()
+            if ret:
 
-            criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
-            corners2 = cv2.cornerSubPix(img_gray, corners, (11,11), (-1,-1), criteria)
+                inicio_esquinas = time.time()
+                criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+                corners2 = cv2.cornerSubPix(img_gray, corners, (11,11), (-1,-1), criteria)
+                
+                img = cv2.drawChessboardCorners(img, (9,6), corners2, ret)
+                final_esquinas = time.time()
 
-            img = cv2.drawChessboardCorners(img, (9,6), corners2, ret)
+                inicio_mtx = time.time()
+                ret, rvecs_img, tvecs_img = cv2.solvePnP(objpoints, corners2, newcameramtx, dist, True, cv2.SOLVEPNP_ITERATIVE)
+                final_mtx = time.time()
 
-            ret, rvecs_img, tvecs_img = cv2.solvePnP(objpoints, corners2, newcameramtx, dist)
+                inicio_nombres = time.time()
+                img = DibujarNombres(img, rvecs_img, tvecs_img, newcameramtx, dist)
+                final_nombres = time.time()
 
-            img = DibujarNombres(img, rvecs_img, tvecs_img, newcameramtx, dist)
+                cv2.imshow('frame',img)
+            else:
+                cv2.imshow('frame',img)
 
-            cv2.imshow('frame',img)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+            print(f"Tiempo Chess: {final_chessboard-inicio_chessboard} Tiempo Esq: {final_esquinas-inicio_esquinas} Tiempo Mtx: {final_mtx-inicio_mtx} Tiempo Nombres: {final_nombres-inicio_nombres}")
         else:
-            cv2.imshow('frame',img)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-
+    print(f"Procesamiento: {time.time()-inicio} ")
 # Cuando terminemos, paramos la captura
     cap.release()
 
