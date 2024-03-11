@@ -128,6 +128,26 @@ def DibujarNombres(img, rvecs_img, tvecs_img, newcameramtx, dist):
     img = cv2.line(img, Borja_pts[4], Borja_pts[5], (0,255,0), 3)
 
 
+
+    letra_A = copy.deepcopy(letras.A)
+    for point in letra_A:
+        point += [12,0,0]
+
+    letra_A = cv2.projectPoints(letra_A, rvecs_img, tvecs_img, newcameramtx, dist)
+    Borja_pts = []
+
+    for element in letra_A[0]:
+        
+        Borja_pts.append(element.ravel().astype(int))
+
+    img = cv2.line(img, Borja_pts[0], Borja_pts[1], (0,255,0), 3)
+    img = cv2.line(img, Borja_pts[1], Borja_pts[2], (0,255,0), 3)
+    img = cv2.line(img, Borja_pts[2], Borja_pts[3], (0,255,0), 3)
+    img = cv2.line(img, Borja_pts[3], Borja_pts[4], (0,255,0), 3)
+    img = cv2.line(img, Borja_pts[1], Borja_pts[3], (0,255,0), 3)
+
+
+
     return img
 
 
@@ -194,7 +214,7 @@ if __name__ == '__main__':
 
     with open("VideoPrueba.csv", 'w') as f:
 
-        csv_writer = csv.writer(f)
+        csv_writer = csv.writer(f, dialect="excel")
         csv_writer.writerow(['Encontrar Chessboard', 'Ajustar Esquinas', 'Calcular Matriz', 'Proyectar Puntos'])
         csv_writer.writerows(tiempos)
 
