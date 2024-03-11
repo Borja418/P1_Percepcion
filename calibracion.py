@@ -212,7 +212,8 @@ if __name__ == '__main__':
 
     with open("VideoPrueba.csv", 'w') as f:
 
-        csv_writer = csv.writer(f, dialect="excel")
+        csv.excel.delimiter=";"
+        csv_writer = csv.writer(f, dialect=csv.excel)
         csv_writer.writerow(['Encontrar Chessboard', 'Ajustar Esquinas', 'Calcular Matriz', 'Proyectar Puntos'])
         csv_writer.writerows(tiempos)
 
