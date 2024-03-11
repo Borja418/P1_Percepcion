@@ -7,6 +7,8 @@ import os
 import letras
 import copy
 import time
+import csv
+
 
 LONGITUD = 3.6
 
@@ -139,8 +141,11 @@ if __name__ == '__main__':
     objpoints[:,:2] = np.mgrid[0:9,0:6].T.reshape(-1,2)
     objpoints = objpoints*LONGITUD
 
+    tiempos = []
+
     cap = cv2.VideoCapture('VideoPrueba.mp4')
     inicio = time.time()
+    
     while(cap.isOpened()):
         
         ret, img = cap.read()
@@ -170,17 +175,28 @@ if __name__ == '__main__':
                 final_nombres = time.time()
 
                 cv2.imshow('frame',img)
+                tiempos.append([final_chessboard-inicio_chessboard, final_esquinas-inicio_esquinas, final_mtx-inicio_mtx, final_nombres-inicio_nombres])
             else:
+                tiempos.append([final_chessboard-inicio_chessboard, 0, 0, 0])
                 cv2.imshow('frame',img)
+
+
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-            print(f"Tiempo Chess: {final_chessboard-inicio_chessboard} Tiempo Esq: {final_esquinas-inicio_esquinas} Tiempo Mtx: {final_mtx-inicio_mtx} Tiempo Nombres: {final_nombres-inicio_nombres}")
+            #print(f"Tiempo Chess: {final_chessboard-inicio_chessboard} Tiempo Esq: {final_esquinas-inicio_esquinas} Tiempo Mtx: {final_mtx-inicio_mtx} Tiempo Nombres: {final_nombres-inicio_nombres}")
         else:
             break
     print(f"Procesamiento: {time.time()-inicio} ")
 # Cuando terminemos, paramos la captura
     cap.release()
+
+
+    with open("VideoPrueba.csv", 'w') as f:
+
+        csv_writer = csv.writer(f)
+        csv_writer.writerow(['Encontrar Chessboard', 'Ajustar Esquinas', 'Calcular Matriz', 'Proyectar Puntos'])
+        csv_writer.writerows(tiempos)
 
 
 
