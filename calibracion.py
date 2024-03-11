@@ -180,8 +180,6 @@ if __name__ == '__main__':
                 tiempos.append([final_chessboard-inicio_chessboard, 0, 0, 0])
                 cv2.imshow('frame',img)
 
-
-
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
             #print(f"Tiempo Chess: {final_chessboard-inicio_chessboard} Tiempo Esq: {final_esquinas-inicio_esquinas} Tiempo Mtx: {final_mtx-inicio_mtx} Tiempo Nombres: {final_nombres-inicio_nombres}")
@@ -194,7 +192,7 @@ if __name__ == '__main__':
 
     with open("VideoPrueba.csv", 'w') as f:
 
-        csv_writer = csv.writer(f)
+        csv_writer = csv.writer(f, dialect="excel")
         csv_writer.writerow(['Encontrar Chessboard', 'Ajustar Esquinas', 'Calcular Matriz', 'Proyectar Puntos'])
         csv_writer.writerows(tiempos)
 
