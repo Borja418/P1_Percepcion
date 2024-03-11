@@ -200,8 +200,6 @@ if __name__ == '__main__':
                 tiempos.append([final_chessboard-inicio_chessboard, 0, 0, 0])
                 cv2.imshow('frame',img)
 
-
-
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
             #print(f"Tiempo Chess: {final_chessboard-inicio_chessboard} Tiempo Esq: {final_esquinas-inicio_esquinas} Tiempo Mtx: {final_mtx-inicio_mtx} Tiempo Nombres: {final_nombres-inicio_nombres}")
