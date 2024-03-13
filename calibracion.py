@@ -11,7 +11,8 @@ import csv
 
 
 LONGITUD = 3.6
-
+ESCALA_BORJA = (1280,720)
+ESCALA_JUAN = (1200,675)
 
 def calibrar():
 
@@ -21,19 +22,19 @@ def calibrar():
 
     objpoints_array = []
     imgpoints_array = []
-    imgs_name = [f for f in os.listdir("Real_Imgs") if f.endswith('.jpg')]
+    imgs_name = [f for f in os.listdir("MovilBorja") if f.endswith('.jpg')]
     
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
     i = 0
     for img_name in imgs_name:
         i+=1
-        img = cv2.imread("Real_Imgs/"+img_name)
+        img = cv2.imread("MovilBorja/"+img_name)
         # Comprobamos que la imagen se ha podido leer
         if img is None:
             print('Error al cargar la imagen')
             quit()
 
-        img = cv2.resize(img, (1200,675))
+        img = cv2.resize(img, ESCALA_BORJA)
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 
@@ -155,7 +156,7 @@ def DibujarNombres(img, rvecs_img, tvecs_img, newcameramtx, dist):
 if __name__ == '__main__':
 
     mtx, dist = calibrar()
-    newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (1200,675), 1, (1200,675))
+    newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, ESCALA_BORJA, 0, ESCALA_BORJA)
 
     objpoints = np.zeros((9*6,3),np.float32)
     objpoints[:,:2] = np.mgrid[0:9,0:6].T.reshape(-1,2)
@@ -163,7 +164,7 @@ if __name__ == '__main__':
 
     tiempos = []
 
-    cap = cv2.VideoCapture('VideoPrueba.mp4')
+    cap = cv2.VideoCapture('VideoMovilBorja.mp4')
     inicio = time.time()
     
     while(cap.isOpened()):
@@ -171,11 +172,11 @@ if __name__ == '__main__':
         ret, img = cap.read()
         
         if ret:
-            img = cv2.resize(img, (1200,675))            
+            img = cv2.resize(img, ESCALA_BORJA)            
             img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
             inicio_chessboard = time.time()
-            ret, corners = cv2.findChessboardCorners(img_gray, (9,6), None)
+            ret, corners = cv2.findChessboardCorners(img_gray, (9,6), cv2.CALIB_CB_ADAPTIVE_THRESH)
             final_chessboard = time.time()
             if ret:
 
@@ -187,11 +188,11 @@ if __name__ == '__main__':
                 final_esquinas = time.time()
 
                 inicio_mtx = time.time()
-                ret, rvecs_img, tvecs_img = cv2.solvePnP(objpoints, corners2, newcameramtx, dist, True, cv2.SOLVEPNP_ITERATIVE)
+                ret, rvecs_img, tvecs_img = cv2.solvePnP(objpoints, corners2, mtx, dist, True, cv2.SOLVEPNP_ITERATIVE)
                 final_mtx = time.time()
 
                 inicio_nombres = time.time()
-                img = DibujarNombres(img, rvecs_img, tvecs_img, newcameramtx, dist)
+                img = DibujarNombres(img, rvecs_img, tvecs_img, mtx, dist)
                 final_nombres = time.time()
 
                 cv2.imshow('frame',img)
@@ -210,7 +211,7 @@ if __name__ == '__main__':
     cap.release()
 
 
-    with open("VideoPrueba.csv", 'w') as f:
+    with open("VideoPruebaBorja.csv", 'w') as f:
 
         csv.excel.delimiter=";"
         csv_writer = csv.writer(f, dialect=csv.excel)
