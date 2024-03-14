@@ -148,6 +148,93 @@ def DibujarNombres(img, rvecs_img, tvecs_img, newcameramtx, dist):
     img = cv2.line(img, Borja_pts[1], Borja_pts[3], (0,255,0), 3)
 
 
+    letra_Y = copy.deepcopy(letras.Y)
+    for point in letra_Y:
+        point += [17,0,0]
+
+    letra_Y = cv2.projectPoints(letra_Y, rvecs_img, tvecs_img, newcameramtx, dist)
+    conj_pts = []
+
+    for element in letra_Y[0]:
+        
+        conj_pts.append(element.ravel().astype(int))
+
+    img = cv2.line(img, conj_pts[0], conj_pts[1], (0,255,0), 3)
+    img = cv2.line(img, conj_pts[1], conj_pts[2], (0,255,0), 3)
+    img = cv2.line(img, conj_pts[1], conj_pts[3], (0,255,0), 3)
+
+
+    letra_J = copy.deepcopy(letras.J)
+    for point in letra_J:
+        point += [22,0,0]
+
+    letra_J = cv2.projectPoints(letra_J, rvecs_img, tvecs_img, newcameramtx, dist)
+    Juan_pts = []
+
+    for element in letra_J[0]:
+        
+        Juan_pts.append(element.ravel().astype(int))
+
+    img = cv2.line(img, Juan_pts[0], Juan_pts[1], (0,255,0), 3)
+    img = cv2.line(img, Juan_pts[2], Juan_pts[3], (0,255,0), 3)
+    img = cv2.line(img, Juan_pts[3], Juan_pts[4], (0,255,0), 3)
+    img = cv2.line(img, Juan_pts[4], Juan_pts[5], (0,255,0), 3)
+
+
+    letra_U = copy.deepcopy(letras.U)
+    for point in letra_U:
+        point += [25,0,0]
+
+    letra_U = cv2.projectPoints(letra_U, rvecs_img, tvecs_img, newcameramtx, dist)
+    Juan_pts = []
+
+    for element in letra_U[0]:
+        
+        Juan_pts.append(element.ravel().astype(int))
+
+    img = cv2.line(img, Juan_pts[0], Juan_pts[1], (0,255,0), 3)
+    img = cv2.line(img, Juan_pts[1], Juan_pts[2], (0,255,0), 3)
+    img = cv2.line(img, Juan_pts[2], Juan_pts[3], (0,255,0), 3)
+    img = cv2.line(img, Juan_pts[3], Juan_pts[4], (0,255,0), 3)
+    img = cv2.line(img, Juan_pts[4], Juan_pts[5], (0,255,0), 3)
+    img = cv2.line(img, Juan_pts[5], Juan_pts[6], (0,255,0), 3)
+
+
+
+    letra_A = copy.deepcopy(letras.A)
+    for point in letra_A:
+        point += [28,0,0]
+
+    letra_A = cv2.projectPoints(letra_A, rvecs_img, tvecs_img, newcameramtx, dist)
+    Juan_pts = []
+
+    for element in letra_A[0]:
+        
+        Juan_pts.append(element.ravel().astype(int))
+
+    img = cv2.line(img, Juan_pts[0], Juan_pts[1], (0,255,0), 3)
+    img = cv2.line(img, Juan_pts[1], Juan_pts[2], (0,255,0), 3)
+    img = cv2.line(img, Juan_pts[2], Juan_pts[3], (0,255,0), 3)
+    img = cv2.line(img, Juan_pts[3], Juan_pts[4], (0,255,0), 3)
+    img = cv2.line(img, Juan_pts[1], Juan_pts[3], (0,255,0), 3)
+
+
+    letra_N = copy.deepcopy(letras.N)
+    for point in letra_N:
+        point += [31,0,0]
+
+    letra_N = cv2.projectPoints(letra_N, rvecs_img, tvecs_img, newcameramtx, dist)
+    Juan_pts = []
+
+    for element in letra_N[0]:
+        
+        Juan_pts.append(element.ravel().astype(int))
+
+    img = cv2.line(img, Juan_pts[0], Juan_pts[1], (0,255,0), 3)
+    img = cv2.line(img, Juan_pts[1], Juan_pts[2], (0,255,0), 3)
+    img = cv2.line(img, Juan_pts[2], Juan_pts[3], (0,255,0), 3)
+
+
 
     return img
 
