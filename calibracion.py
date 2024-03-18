@@ -22,19 +22,19 @@ def calibrar():
 
     objpoints_array = []
     imgpoints_array = []
-    imgs_name = [f for f in os.listdir("Real_Imgs") if f.endswith('.jpg')]
+    imgs_name = [f for f in os.listdir("MovilBorja") if f.endswith('.jpg')]
     
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
-    i = 0
+    count = 0
     for img_name in imgs_name:
-        i+=1
-        img = cv2.imread("Real_Imgs/"+img_name)
+        count+=1
+        img = cv2.imread("MovilBorja/"+img_name)
         # Comprobamos que la imagen se ha podido leer
         if img is None:
             print('Error al cargar la imagen')
             quit()
 
-        img = cv2.resize(img, ESCALA_JUAN)
+        img = cv2.resize(img, ESCALA_BORJA)
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 
@@ -50,12 +50,23 @@ def calibrar():
 
             """ cv2.imshow("Esquinas",img)
             cv2.waitKey(0) """
-        if i == 24:
+            
+        if count == 20:
             break
+        
     
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints_array, imgpoints_array, img_gray.shape[::-1], None, None)
     print(ret)
-    print(f"Numero de imagenes para la calibracion: {i}")
+    print(f"Numero de imagenes para la calibracion: {count}")
+                
+    mean_error = 0
+    for i in range(len(objpoints_array)):
+        imgpoints2, _ = cv2.projectPoints(objpoints_array[i], rvecs[i], tvecs[i], mtx, dist)
+        error = cv2.norm(imgpoints_array[i], imgpoints2, cv2.NORM_L2)/len(imgpoints2)
+        mean_error += error
+        print(error)
+ 
+    print( "total error: {}".format(mean_error/len(objpoints_array)) )
 
     return mtx, dist
 
@@ -156,7 +167,7 @@ def DibujarNombres(img, rvecs_img, tvecs_img, newcameramtx, dist):
 if __name__ == '__main__':
 
     mtx, dist = calibrar()
-    newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, ESCALA_JUAN, 0, ESCALA_JUAN)
+    newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, ESCALA_BORJA, 0, ESCALA_BORJA)
 
     objpoints = np.zeros((9*6,3),np.float32)
     objpoints[:,:2] = np.mgrid[0:9,0:6].T.reshape(-1,2)
@@ -164,7 +175,7 @@ if __name__ == '__main__':
 
     tiempos = []
 
-    cap = cv2.VideoCapture('VideoPrueba.mp4')
+    cap = cv2.VideoCapture('VideoPruebaBorja.mp4')
     inicio = time.time()
     
     while(cap.isOpened()):
@@ -172,7 +183,7 @@ if __name__ == '__main__':
         ret, img = cap.read()
         
         if ret:
-            img = cv2.resize(img, ESCALA_JUAN)            
+            img = cv2.resize(img, ESCALA_BORJA)            
             img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
             inicio_chessboard = time.time()
@@ -211,12 +222,12 @@ if __name__ == '__main__':
     cap.release()
 
 
-    with open("VideoPruebaV2.csv", 'w') as f:
+    '''with open("VideoPruebaV2.csv", 'w') as f:
 
         csv.excel.delimiter=";"
         csv_writer = csv.writer(f, dialect=csv.excel)
         csv_writer.writerow(['Encontrar Chessboard', 'Ajustar Esquinas', 'Calcular Matriz', 'Proyectar Puntos'])
-        csv_writer.writerows(tiempos)
+        csv_writer.writerows(tiempos)'''
 
 
 
