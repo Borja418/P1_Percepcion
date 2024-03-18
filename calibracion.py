@@ -14,10 +14,29 @@ LONGITUD = 3.6
 ESCALA_BORJA = (1280,720)
 ESCALA_JUAN = (1200,675)
 
-def Rx(theta):
-    return np.matrix([[ 1, 0           , 0           ],
-                   [ 0, math.cos(theta),-math.sin(theta)],
-                   [ 0, math.sin(theta), math.cos(theta)]])
+def Rz(theta):
+  return np.matrix([[ math.cos(theta), -math.sin(theta), 0 ],
+                   [ math.sin(theta), math.cos(theta) , 0 ],
+                   [ 0           , 0            , 1 ]])
+
+def Transform_Points(points,x,y,z,theta,x_post,y_post,z_post):
+    
+    
+    tmp_points = []
+    
+
+    for point in points:
+        point += [x,y,z]
+        point = np.dot(Rz(theta), point)
+        point += [x_post,y_post,z_post]
+        tmp_points.append(point.flatten())
+    
+    tmp_points = np.array(tmp_points)
+    
+    return tmp_points
+
+
+
 
 
 def calibrar():
@@ -76,191 +95,184 @@ def calibrar():
 
     return mtx, dist
 
-def DibujarNombres(img, rvecs_img, tvecs_img, newcameramtx, dist):
+def DibujarNombres(img, rvecs_img, tvecs_img, mtx, dist):
     
 
-    letra_B = cv2.projectPoints(letras.B, rvecs_img, tvecs_img, newcameramtx, dist)
-    Borja_pts = []
+    letra_B = copy.deepcopy(letras.B)
+    
+    letra_B = Transform_Points(letra_B,0,0,0,-math.pi/4,0,3*LONGITUD,0)
+
+    letra_B = cv2.projectPoints(letra_B, rvecs_img, tvecs_img, mtx, dist)
+    Pts = []
 
     for element in letra_B[0]:
         
-        Borja_pts.append(element.ravel().astype(int))
+        Pts.append(element.ravel().astype(int))
 
-    img = cv2.line(img, Borja_pts[0], Borja_pts[1], (0,255,0), 3)
-    img = cv2.line(img, Borja_pts[1], Borja_pts[2], (0,255,0), 3)
-    img = cv2.line(img, Borja_pts[2], Borja_pts[3], (0,255,0), 3)
-    img = cv2.line(img, Borja_pts[3], Borja_pts[4], (0,255,0), 3)
-    img = cv2.line(img, Borja_pts[4], Borja_pts[5], (0,255,0), 3)
-    img = cv2.line(img, Borja_pts[4], Borja_pts[6], (0,255,0), 3)
-    img = cv2.line(img, Borja_pts[6], Borja_pts[7], (0,255,0), 3)
-    img = cv2.line(img, Borja_pts[7], Borja_pts[0], (0,255,0), 3)
+    img = cv2.line(img, Pts[0], Pts[1], (0,255,0), 3)
+    img = cv2.line(img, Pts[1], Pts[2], (0,255,0), 3)
+    img = cv2.line(img, Pts[2], Pts[3], (0,255,0), 3)
+    img = cv2.line(img, Pts[3], Pts[4], (0,255,0), 3)
+    img = cv2.line(img, Pts[4], Pts[5], (0,255,0), 3)
+    img = cv2.line(img, Pts[4], Pts[6], (0,255,0), 3)
+    img = cv2.line(img, Pts[6], Pts[7], (0,255,0), 3)
+    img = cv2.line(img, Pts[7], Pts[0], (0,255,0), 3)
     
 
-    rot = Rx(math.pi/2)
     letra_O = copy.deepcopy(letras.O)
     
-    for point in letra_O:
-        print(type(point))
-        point = np.dot(rot, point)
+    letra_O = Transform_Points(letra_O,3,0,0,-math.pi/4,0,3*LONGITUD,0)
         
-        
-        point += [3,0,0]
-        point = np.array(point).ravel()
-        print(type(point))
-        print(point)
-    
-    print(letra_O)
-        
-    letra_O = cv2.projectPoints(letra_O, rvecs_img, tvecs_img, newcameramtx, dist)
-    Borja_pts = []
+    letra_O = cv2.projectPoints(letra_O, rvecs_img, tvecs_img, mtx, dist)
+    Pts = []
 
     for element in letra_O[0]:
         
-        Borja_pts.append(element.ravel().astype(int))
+        Pts.append(element.ravel().astype(int))
 
-    img = cv2.line(img, Borja_pts[0], Borja_pts[1], (0,255,0), 3)
-    img = cv2.line(img, Borja_pts[1], Borja_pts[2], (0,255,0), 3)
-    img = cv2.line(img, Borja_pts[2], Borja_pts[3], (0,255,0), 3)
-    img = cv2.line(img, Borja_pts[3], Borja_pts[0], (0,255,0), 3)
+    img = cv2.line(img, Pts[0], Pts[1], (0,255,0), 3)
+    img = cv2.line(img, Pts[1], Pts[2], (0,255,0), 3)
+    img = cv2.line(img, Pts[2], Pts[3], (0,255,0), 3)
+    img = cv2.line(img, Pts[3], Pts[0], (0,255,0), 3)
 
     letra_R = copy.deepcopy(letras.R)
-    for point in letra_R:
-        point += [6,0,0]
+    
+    letra_R = Transform_Points(letra_R,6,0,0,-math.pi/4,0,3*LONGITUD,0)
 
-    letra_R = cv2.projectPoints(letra_R, rvecs_img, tvecs_img, newcameramtx, dist)
-    Borja_pts = []
+    letra_R = cv2.projectPoints(letra_R, rvecs_img, tvecs_img, mtx, dist)
+    Pts = []
 
     for element in letra_R[0]:
         
-        Borja_pts.append(element.ravel().astype(int))
+        Pts.append(element.ravel().astype(int))
 
-    img = cv2.line(img, Borja_pts[0], Borja_pts[1], (0,255,0), 3)
-    img = cv2.line(img, Borja_pts[1], Borja_pts[2], (0,255,0), 3)
-    img = cv2.line(img, Borja_pts[2], Borja_pts[3], (0,255,0), 3)
-    img = cv2.line(img, Borja_pts[3], Borja_pts[4], (0,255,0), 3)
-    img = cv2.line(img, Borja_pts[5], Borja_pts[6], (0,255,0), 3)
+    img = cv2.line(img, Pts[0], Pts[1], (0,255,0), 3)
+    img = cv2.line(img, Pts[1], Pts[2], (0,255,0), 3)
+    img = cv2.line(img, Pts[2], Pts[3], (0,255,0), 3)
+    img = cv2.line(img, Pts[3], Pts[4], (0,255,0), 3)
+    img = cv2.line(img, Pts[5], Pts[6], (0,255,0), 3)
 
     letra_J = copy.deepcopy(letras.J)
-    for point in letra_J:
-        point += [9,0,0]
+    
+    letra_J = Transform_Points(letra_J,9,0,0,-math.pi/4,0,3*LONGITUD,0)
 
-    letra_J = cv2.projectPoints(letra_J, rvecs_img, tvecs_img, newcameramtx, dist)
-    Borja_pts = []
+    letra_J = cv2.projectPoints(letra_J, rvecs_img, tvecs_img, mtx, dist)
+    Pts = []
 
     for element in letra_J[0]:
         
-        Borja_pts.append(element.ravel().astype(int))
+        Pts.append(element.ravel().astype(int))
 
-    img = cv2.line(img, Borja_pts[0], Borja_pts[1], (0,255,0), 3)
-    img = cv2.line(img, Borja_pts[2], Borja_pts[3], (0,255,0), 3)
-    img = cv2.line(img, Borja_pts[3], Borja_pts[4], (0,255,0), 3)
-    img = cv2.line(img, Borja_pts[4], Borja_pts[5], (0,255,0), 3)
+    img = cv2.line(img, Pts[0], Pts[1], (0,255,0), 3)
+    img = cv2.line(img, Pts[2], Pts[3], (0,255,0), 3)
+    img = cv2.line(img, Pts[3], Pts[4], (0,255,0), 3)
+    img = cv2.line(img, Pts[4], Pts[5], (0,255,0), 3)
 
 
 
     letra_A = copy.deepcopy(letras.A)
-    for point in letra_A:
-        point += [12,0,0]
+    
+    letra_A = Transform_Points(letra_A,12,0,0,-math.pi/4,0,3*LONGITUD,0)
 
-    letra_A = cv2.projectPoints(letra_A, rvecs_img, tvecs_img, newcameramtx, dist)
-    Borja_pts = []
+    letra_A = cv2.projectPoints(letra_A, rvecs_img, tvecs_img, mtx, dist)
+    Pts = []
 
     for element in letra_A[0]:
         
-        Borja_pts.append(element.ravel().astype(int))
+        Pts.append(element.ravel().astype(int))
 
-    img = cv2.line(img, Borja_pts[0], Borja_pts[1], (0,255,0), 3)
-    img = cv2.line(img, Borja_pts[1], Borja_pts[2], (0,255,0), 3)
-    img = cv2.line(img, Borja_pts[2], Borja_pts[3], (0,255,0), 3)
-    img = cv2.line(img, Borja_pts[3], Borja_pts[4], (0,255,0), 3)
-    img = cv2.line(img, Borja_pts[1], Borja_pts[3], (0,255,0), 3)
+    img = cv2.line(img, Pts[0], Pts[1], (0,255,0), 3)
+    img = cv2.line(img, Pts[1], Pts[2], (0,255,0), 3)
+    img = cv2.line(img, Pts[2], Pts[3], (0,255,0), 3)
+    img = cv2.line(img, Pts[3], Pts[4], (0,255,0), 3)
+    img = cv2.line(img, Pts[1], Pts[3], (0,255,0), 3)
 
 
     letra_Y = copy.deepcopy(letras.Y)
-    for point in letra_Y:
-        point += [17,0,0]
+    
+    letra_Y = Transform_Points(letra_Y,4*LONGITUD-1,0,0,0,0,0,0)
 
-    letra_Y = cv2.projectPoints(letra_Y, rvecs_img, tvecs_img, newcameramtx, dist)
-    conj_pts = []
+    letra_Y = cv2.projectPoints(letra_Y, rvecs_img, tvecs_img, mtx, dist)
+    Pts = []
 
     for element in letra_Y[0]:
         
-        conj_pts.append(element.ravel().astype(int))
+        Pts.append(element.ravel().astype(int))
 
-    img = cv2.line(img, conj_pts[0], conj_pts[1], (0,255,0), 3)
-    img = cv2.line(img, conj_pts[1], conj_pts[2], (0,255,0), 3)
-    img = cv2.line(img, conj_pts[1], conj_pts[3], (0,255,0), 3)
+    img = cv2.line(img, Pts[0], Pts[1], (0,255,0), 3)
+    img = cv2.line(img, Pts[1], Pts[2], (0,255,0), 3)
+    img = cv2.line(img, Pts[1], Pts[3], (0,255,0), 3)
 
 
     letra_J = copy.deepcopy(letras.J)
-    for point in letra_J:
-        point += [22,0,0]
+    
+    letra_J = Transform_Points(letra_J,0,0,0,math.pi/4,6*LONGITUD,0,0)
 
-    letra_J = cv2.projectPoints(letra_J, rvecs_img, tvecs_img, newcameramtx, dist)
-    Juan_pts = []
+    letra_J = cv2.projectPoints(letra_J, rvecs_img, tvecs_img, mtx, dist)
+    Pts = []
 
     for element in letra_J[0]:
         
-        Juan_pts.append(element.ravel().astype(int))
+        Pts.append(element.ravel().astype(int))
 
-    img = cv2.line(img, Juan_pts[0], Juan_pts[1], (0,255,0), 3)
-    img = cv2.line(img, Juan_pts[2], Juan_pts[3], (0,255,0), 3)
-    img = cv2.line(img, Juan_pts[3], Juan_pts[4], (0,255,0), 3)
-    img = cv2.line(img, Juan_pts[4], Juan_pts[5], (0,255,0), 3)
+    img = cv2.line(img, Pts[0], Pts[1], (0,255,0), 3)
+    img = cv2.line(img, Pts[2], Pts[3], (0,255,0), 3)
+    img = cv2.line(img, Pts[3], Pts[4], (0,255,0), 3)
+    img = cv2.line(img, Pts[4], Pts[5], (0,255,0), 3)
 
 
     letra_U = copy.deepcopy(letras.U)
-    for point in letra_U:
-        point += [25,0,0]
+    
+    letra_U = Transform_Points(letra_U,3,0,0,math.pi/4,6*LONGITUD,0,0)
 
-    letra_U = cv2.projectPoints(letra_U, rvecs_img, tvecs_img, newcameramtx, dist)
-    Juan_pts = []
+    letra_U = cv2.projectPoints(letra_U, rvecs_img, tvecs_img, mtx, dist)
+    Pts = []
 
     for element in letra_U[0]:
         
-        Juan_pts.append(element.ravel().astype(int))
+        Pts.append(element.ravel().astype(int))
 
-    img = cv2.line(img, Juan_pts[0], Juan_pts[1], (0,255,0), 3)
-    img = cv2.line(img, Juan_pts[1], Juan_pts[2], (0,255,0), 3)
-    img = cv2.line(img, Juan_pts[2], Juan_pts[3], (0,255,0), 3)
-    img = cv2.line(img, Juan_pts[3], Juan_pts[4], (0,255,0), 3)
-    img = cv2.line(img, Juan_pts[4], Juan_pts[5], (0,255,0), 3)
-    img = cv2.line(img, Juan_pts[5], Juan_pts[6], (0,255,0), 3)
+    img = cv2.line(img, Pts[0], Pts[1], (0,255,0), 3)
+    img = cv2.line(img, Pts[1], Pts[2], (0,255,0), 3)
+    img = cv2.line(img, Pts[2], Pts[3], (0,255,0), 3)
+    img = cv2.line(img, Pts[3], Pts[4], (0,255,0), 3)
+    img = cv2.line(img, Pts[4], Pts[5], (0,255,0), 3)
+    img = cv2.line(img, Pts[5], Pts[6], (0,255,0), 3)
 
 
 
     letra_A = copy.deepcopy(letras.A)
-    for point in letra_A:
-        point += [28,0,0]
+    
+    letra_A = Transform_Points(letra_A,6,0,0,math.pi/4,6*LONGITUD,0,0)
 
-    letra_A = cv2.projectPoints(letra_A, rvecs_img, tvecs_img, newcameramtx, dist)
-    Juan_pts = []
+    letra_A = cv2.projectPoints(letra_A, rvecs_img, tvecs_img, mtx, dist)
+    Pts = []
 
     for element in letra_A[0]:
         
-        Juan_pts.append(element.ravel().astype(int))
+        Pts.append(element.ravel().astype(int))
 
-    img = cv2.line(img, Juan_pts[0], Juan_pts[1], (0,255,0), 3)
-    img = cv2.line(img, Juan_pts[1], Juan_pts[2], (0,255,0), 3)
-    img = cv2.line(img, Juan_pts[2], Juan_pts[3], (0,255,0), 3)
-    img = cv2.line(img, Juan_pts[3], Juan_pts[4], (0,255,0), 3)
-    img = cv2.line(img, Juan_pts[1], Juan_pts[3], (0,255,0), 3)
+    img = cv2.line(img, Pts[0], Pts[1], (0,255,0), 3)
+    img = cv2.line(img, Pts[1], Pts[2], (0,255,0), 3)
+    img = cv2.line(img, Pts[2], Pts[3], (0,255,0), 3)
+    img = cv2.line(img, Pts[3], Pts[4], (0,255,0), 3)
+    img = cv2.line(img, Pts[1], Pts[3], (0,255,0), 3)
 
 
     letra_N = copy.deepcopy(letras.N)
-    for point in letra_N:
-        point += [31,0,0]
+    
+    letra_N = Transform_Points(letra_N,9,0,0,math.pi/4,6*LONGITUD,0,0)
 
-    letra_N = cv2.projectPoints(letra_N, rvecs_img, tvecs_img, newcameramtx, dist)
-    Juan_pts = []
+    letra_N = cv2.projectPoints(letra_N, rvecs_img, tvecs_img, mtx, dist)
+    Pts = []
 
     for element in letra_N[0]:
         
-        Juan_pts.append(element.ravel().astype(int))
+        Pts.append(element.ravel().astype(int))
 
-    img = cv2.line(img, Juan_pts[0], Juan_pts[1], (0,255,0), 3)
-    img = cv2.line(img, Juan_pts[1], Juan_pts[2], (0,255,0), 3)
-    img = cv2.line(img, Juan_pts[2], Juan_pts[3], (0,255,0), 3)
+    img = cv2.line(img, Pts[0], Pts[1], (0,255,0), 3)
+    img = cv2.line(img, Pts[1], Pts[2], (0,255,0), 3)
+    img = cv2.line(img, Pts[2], Pts[3], (0,255,0), 3)
 
 
 
@@ -271,7 +283,6 @@ def DibujarNombres(img, rvecs_img, tvecs_img, newcameramtx, dist):
 if __name__ == '__main__':
 
     mtx, dist = calibrar()
-    newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, ESCALA_BORJA, 0, ESCALA_BORJA)
 
     objpoints = np.zeros((9*6,3),np.float32)
     objpoints[:,:2] = np.mgrid[0:9,0:6].T.reshape(-1,2)
