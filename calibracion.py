@@ -8,11 +8,17 @@ import letras
 import copy
 import time
 import csv
-
+import math
 
 LONGITUD = 3.6
 ESCALA_BORJA = (1280,720)
 ESCALA_JUAN = (1200,675)
+
+def Rx(theta):
+    return np.matrix([[ 1, 0           , 0           ],
+                   [ 0, math.cos(theta),-math.sin(theta)],
+                   [ 0, math.sin(theta), math.cos(theta)]])
+
 
 def calibrar():
 
@@ -22,19 +28,19 @@ def calibrar():
 
     objpoints_array = []
     imgpoints_array = []
-    imgs_name = [f for f in os.listdir("MovilBorja") if f.endswith('.jpg')]
+    imgs_name = [f for f in os.listdir("Real_Imgs") if f.endswith('.jpg')]
     
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
     count = 0
     for img_name in imgs_name:
         count+=1
-        img = cv2.imread("MovilBorja/"+img_name)
+        img = cv2.imread("Real_Imgs/"+img_name)
         # Comprobamos que la imagen se ha podido leer
         if img is None:
             print('Error al cargar la imagen')
             quit()
 
-        img = cv2.resize(img, ESCALA_BORJA)
+        img = cv2.resize(img, ESCALA_JUAN)
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 
@@ -89,11 +95,22 @@ def DibujarNombres(img, rvecs_img, tvecs_img, newcameramtx, dist):
     img = cv2.line(img, Borja_pts[6], Borja_pts[7], (0,255,0), 3)
     img = cv2.line(img, Borja_pts[7], Borja_pts[0], (0,255,0), 3)
     
+
+    rot = Rx(math.pi/2)
     letra_O = copy.deepcopy(letras.O)
+    
     for point in letra_O:
+        print(type(point))
+        point = np.dot(rot, point)
+        
+        
         point += [3,0,0]
-
-
+        point = np.array(point).ravel()
+        print(type(point))
+        print(point)
+    
+    print(letra_O)
+        
     letra_O = cv2.projectPoints(letra_O, rvecs_img, tvecs_img, newcameramtx, dist)
     Borja_pts = []
 
@@ -262,7 +279,7 @@ if __name__ == '__main__':
 
     tiempos = []
 
-    cap = cv2.VideoCapture('VideoPruebaBorja.mp4')
+    cap = cv2.VideoCapture('VideoPrueba.mp4')
     inicio = time.time()
     
     while(cap.isOpened()):
@@ -270,7 +287,7 @@ if __name__ == '__main__':
         ret, img = cap.read()
         
         if ret:
-            img = cv2.resize(img, ESCALA_BORJA)            
+            img = cv2.resize(img, ESCALA_JUAN)            
             img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
             inicio_chessboard = time.time()
