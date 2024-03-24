@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# Importar librerías
+
 import cv2
 import numpy as np
 import os
@@ -10,20 +12,42 @@ import time
 import csv
 import math
 
+# Variables globales
+
 LONGITUD = 3.6
+
 ESCALA_BORJA = (1280,720)
+ESCALA_BORJA_ORIGINAL = (1920,1080)
 ESCALA_JUAN = (1200,675)
+
+URI_BORJA = "MovilBorja"
+URI_JUAN = "Real_Imgs"
+
+VIDEO_BORJA = "VideoMovil.mp4"
+VIDEO_JUAN = "VideoOrdenador.mp4"
+
+URI = URI_BORJA
+ESCALA = ESCALA_BORJA
+VIDEO = VIDEO_BORJA
+
+OBJPOINTS = np.zeros((9*6,3),np.float32)
+OBJPOINTS[:,:2] = np.mgrid[0:9,0:6].T.reshape(-1,2)
+OBJPOINTS = OBJPOINTS*LONGITUD
+
+CRITERIA = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+
+# Función para obtener la matriz de rotación en eje z
 
 def Rz(theta):
   return np.matrix([[ math.cos(theta), -math.sin(theta), 0 ],
                    [ math.sin(theta), math.cos(theta) , 0 ],
                    [ 0           , 0            , 1 ]])
 
+# Función para aplicar transformadas a los puntos
+
 def Transform_Points(points,x,y,z,theta,x_post,y_post,z_post):
     
-    
-    tmp_points = []
-    
+    tmp_points = [] 
 
     for point in points:
         point += [x,y,z]
@@ -35,79 +59,61 @@ def Transform_Points(points,x,y,z,theta,x_post,y_post,z_post):
     
     return tmp_points
 
-
-
-
+# Función para obtener los parámetros intrínsecos de la cámara
 
 def calibrar():
-
-    objpoints = np.zeros((9*6,3),np.float32)
-    objpoints[:,:2] = np.mgrid[0:9,0:6].T.reshape(-1,2)
-    objpoints = objpoints*LONGITUD
-
+    # Definición de variables
     objpoints_array = []
     imgpoints_array = []
-    imgs_name = [f for f in os.listdir("Real_Imgs") if f.endswith('.jpg')]
-    
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
     count = 0
+    
+    imgs_name = [f for f in os.listdir(URI) if f.endswith('.jpg')]  # Obtener nombres de archivos dentro de la carpeta
+    
     for img_name in imgs_name:
-        count+=1
-        img = cv2.imread("Real_Imgs/"+img_name)
-        # Comprobamos que la imagen se ha podido leer
-        if img is None:
+        
+        
+        img = cv2.imread(URI+"/"+img_name)  # Cargar imagen
+        
+        if img is None:     # Comprobar que la imagen se ha podido leer
             print('Error al cargar la imagen')
             quit()
 
-        img = cv2.resize(img, ESCALA_JUAN)
+        img = cv2.resize(img, ESCALA)
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-
-        ret, corners = cv2.findChessboardCorners(img_gray, (9,6), None)
+        ret, corners = cv2.findChessboardCorners(img_gray, (9,6), None) # Encontrar esquinas del patrón de calibración
         
-        if ret:
-            objpoints_array.append(objpoints)
+        if ret:     # Si se ha podido encontrar
+            
+            count+=1
+            objpoints_array.append(OBJPOINTS)   # Añadir información neceria del punto para la calibración
 
-            corners2 = cv2.cornerSubPix(img_gray, corners, (11,11), (-1,-1), criteria)
+            corners2 = cv2.cornerSubPix(img_gray, corners, (11,11), (-1,-1), CRITERIA)
             imgpoints_array.append(corners2)
 
-            img = cv2.drawChessboardCorners(img, (9,6), corners2, ret)
 
-            """ cv2.imshow("Esquinas",img)
-            cv2.waitKey(0) """
-            
-        if count == 20:
-            break
-        
+    ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints_array, imgpoints_array, img_gray.shape[::-1], None, None)  # Calibrar cámara
     
-    ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints_array, imgpoints_array, img_gray.shape[::-1], None, None)
-    print(ret)
     print(f"Numero de imagenes para la calibracion: {count}")
-                
-    mean_error = 0
-    for i in range(len(objpoints_array)):
-        imgpoints2, _ = cv2.projectPoints(objpoints_array[i], rvecs[i], tvecs[i], mtx, dist)
-        error = cv2.norm(imgpoints_array[i], imgpoints2, cv2.NORM_L2)/len(imgpoints2)
-        mean_error += error
-        print(error)
- 
-    print( "total error: {}".format(mean_error/len(objpoints_array)) )
 
     return mtx, dist
 
-def DibujarNombres(img, rvecs_img, tvecs_img, mtx, dist):
-    
+    # Función que proyecta los puntos de los nombres y dibuja lineas
 
-    letra_B = copy.deepcopy(letras.B)
+def DibujarNombres(img, rvecs_img, tvecs_img, mtx, dist):   
     
-    letra_B = Transform_Points(letra_B,0,0,0,-math.pi/4,0,3*LONGITUD,0)
+    letra_B = copy.deepcopy(letras.B)   # Copiar puntos 3D de la letra
+    
+    letra_B = Transform_Points(letra_B,0,0,0,-math.pi/4,0,3*LONGITUD,0)     # Transformar las letras 
 
-    letra_B = cv2.projectPoints(letra_B, rvecs_img, tvecs_img, mtx, dist)
+    letra_B = cv2.projectPoints(letra_B, rvecs_img, tvecs_img, mtx, dist)   # Obtener puntos 2D
     Pts = []
 
-    for element in letra_B[0]:
+    for element in letra_B[0]:  # Pasarlos a tipo int
         
         Pts.append(element.ravel().astype(int))
+    
+    # Dibujar lineas
 
     img = cv2.line(img, Pts[0], Pts[1], (0,255,0), 3)
     img = cv2.line(img, Pts[1], Pts[2], (0,255,0), 3)
@@ -282,46 +288,45 @@ def DibujarNombres(img, rvecs_img, tvecs_img, mtx, dist):
 
 if __name__ == '__main__':
 
-    mtx, dist = calibrar()
-
-    objpoints = np.zeros((9*6,3),np.float32)
-    objpoints[:,:2] = np.mgrid[0:9,0:6].T.reshape(-1,2)
-    objpoints = objpoints*LONGITUD
+    mtx, dist = calibrar()  # Calibrar cámara para obtener parámetros intrínsecos 
 
     tiempos = []
 
-    cap = cv2.VideoCapture('VideoPrueba.mp4')
-    inicio = time.time()
+    cap = cv2.VideoCapture(VIDEO)   # Obtener video
+
+    inicio = time.time()        # Obtener tiempo inicial
     
-    while(cap.isOpened()):
+    while(cap.isOpened()):      # Si se ha abierto correctamente el video
         
-        ret, img = cap.read()
+        ret, img = cap.read()   # Obtener frame
         
-        if ret:
-            img = cv2.resize(img, ESCALA_JUAN)            
+        if ret:     
+            
+            img = cv2.resize(img, ESCALA)            
             img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
             inicio_chessboard = time.time()
-            ret, corners = cv2.findChessboardCorners(img_gray, (9,6), cv2.CALIB_CB_ADAPTIVE_THRESH)
+            ret, corners = cv2.findChessboardCorners(img_gray, (9,6), cv2.CALIB_CB_ADAPTIVE_THRESH) # Encontrar esquinas del patrón de calibración
             final_chessboard = time.time()
+            
             if ret:
 
                 inicio_esquinas = time.time()
-                criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
-                corners2 = cv2.cornerSubPix(img_gray, corners, (11,11), (-1,-1), criteria)
+                corners2 = cv2.cornerSubPix(img_gray, corners, (11,11), (-1,-1), CRITERIA)  # Refinar esquinas del patrón de calibración
                 
-                img = cv2.drawChessboardCorners(img, (9,6), corners2, ret)
+                img = cv2.drawChessboardCorners(img, (9,6), corners2, ret)      # Dibujar esquinas refinadas
                 final_esquinas = time.time()
 
                 inicio_mtx = time.time()
-                ret, rvecs_img, tvecs_img = cv2.solvePnP(objpoints, corners2, mtx, dist, True, cv2.SOLVEPNP_ITERATIVE)
+                ret, rvecs_img, tvecs_img = cv2.solvePnP(OBJPOINTS, corners2, mtx, dist, True, cv2.SOLVEPNP_ITERATIVE)  # Obtener parámetros extrinsecos
                 final_mtx = time.time()
 
                 inicio_nombres = time.time()
-                img = DibujarNombres(img, rvecs_img, tvecs_img, mtx, dist)
+                img = DibujarNombres(img, rvecs_img, tvecs_img, mtx, dist)      # Proyectar puntos de las letras
                 final_nombres = time.time()
 
-                cv2.imshow('frame',img)
+                cv2.imshow('frame',img)     # Mostrar imagen
+                
                 tiempos.append([final_chessboard-inicio_chessboard, final_esquinas-inicio_esquinas, final_mtx-inicio_mtx, final_nombres-inicio_nombres])
             else:
                 tiempos.append([final_chessboard-inicio_chessboard, 0, 0, 0])
@@ -333,7 +338,7 @@ if __name__ == '__main__':
         else:
             break
     print(f"Procesamiento: {time.time()-inicio} ")
-# Cuando terminemos, paramos la captura
+    # Cuando terminemos, paramos la captura
     cap.release()
 
 
