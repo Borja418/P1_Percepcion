@@ -26,9 +26,9 @@ URI_JUAN = "Real_Imgs"
 VIDEO_BORJA = "VideoMovil.mp4"
 VIDEO_JUAN = "VideoOrdenador.mp4"
 
-URI = URI_BORJA
-ESCALA = ESCALA_BORJA
-VIDEO = VIDEO_BORJA
+URI = URI_JUAN
+ESCALA = ESCALA_JUAN
+VIDEO = VIDEO_JUAN
 
 OBJPOINTS = np.zeros((9*6,3),np.float32)
 OBJPOINTS[:,:2] = np.mgrid[0:9,0:6].T.reshape(-1,2)
@@ -306,7 +306,7 @@ if __name__ == '__main__':
             img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
             inicio_chessboard = time.time()
-            ret, corners = cv2.findChessboardCorners(img_gray, (9,6), cv2.CALIB_CB_ADAPTIVE_THRESH) # Encontrar esquinas del patrón de calibración
+            ret, corners = cv2.findChessboardCorners(img_gray, (9,6), None) # Encontrar esquinas del patrón de calibración
             final_chessboard = time.time()
             
             if ret:
@@ -337,6 +337,7 @@ if __name__ == '__main__':
             #print(f"Tiempo Chess: {final_chessboard-inicio_chessboard} Tiempo Esq: {final_esquinas-inicio_esquinas} Tiempo Mtx: {final_mtx-inicio_mtx} Tiempo Nombres: {final_nombres-inicio_nombres}")
         else:
             break
+        
     print(f"Procesamiento: {time.time()-inicio} ")
     # Cuando terminemos, paramos la captura
     cap.release()

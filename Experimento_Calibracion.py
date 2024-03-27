@@ -16,8 +16,8 @@ ESCALA_JUAN = (1200,675)
 URI_BORJA = "MovilBorja"
 URI_JUAN = "Real_Imgs"
 
-URI = URI_BORJA
-ESCALA = ESCALA_BORJA
+URI = URI_JUAN
+ESCALA = ESCALA_JUAN
 
 OBJPOINTS = np.zeros((9*6,3),np.float32)
 OBJPOINTS[:,:2] = np.mgrid[0:9,0:6].T.reshape(-1,2)
@@ -61,7 +61,7 @@ def Calibrar(num_img):
             break
             
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints_array, imgpoints_array, img_gray.shape[::-1], None, None)  # Calibrar la cámara
-    
+    print(ret)
     return mtx, dist    # Devolver parámetros intrínsecos
 
 
@@ -104,8 +104,7 @@ def Comprobar_Error(mtx, dist):
             
             error = cv2.norm(corners2, imgpoints2, cv2.NORM_L2)/len(imgpoints2)     # Obtener error entre las proyecciones y esquinas del patrón encontrados.
             mean_error += error
-    
-
+            
     mean_error = mean_error/count_imgs  # Calcular error medio
     
     return mean_error
