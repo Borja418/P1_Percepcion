@@ -19,6 +19,7 @@ LONGITUD = 3.6
 ESCALA_BORJA = (1280,720)
 ESCALA_BORJA_ORIGINAL = (1920,1080)
 ESCALA_JUAN = (1200,675)
+ESCALA_PEQ = (1920,1080)
 
 URI_BORJA = "Movil"
 URI_JUAN = "Ordenador"
@@ -40,7 +41,7 @@ OBJPOINTS_PEQ[:,:2] = np.mgrid[0:5,0:4].T.reshape(-1,2)
 OBJPOINTS_PEQ = OBJPOINTS_PEQ*LONGITUD
 
 URI = URI_PATTERNPEQ
-ESCALA = ESCALA_JUAN
+ESCALA = ESCALA_PEQ
 OBJPOINTS = OBJPOINTS_PEQ
 GRID = GRID_PEQ
 VIDEO = VIDEO_PEQ
@@ -324,7 +325,7 @@ if __name__ == '__main__':
                 inicio_esquinas = time.time()
                 corners2 = cv2.cornerSubPix(img_gray, corners, (11,11), (-1,-1), CRITERIA)  # Refinar esquinas del patrón de calibración
                 
-                img = cv2.drawChessboardCorners(img, (9,6), corners2, ret)      # Dibujar esquinas refinadas
+                img = cv2.drawChessboardCorners(img, GRID, corners2, ret)      # Dibujar esquinas refinadas
                 final_esquinas = time.time()
 
                 inicio_mtx = time.time()
