@@ -20,19 +20,30 @@ ESCALA_BORJA = (1280,720)
 ESCALA_BORJA_ORIGINAL = (1920,1080)
 ESCALA_JUAN = (1200,675)
 
-URI_BORJA = "MovilBorja"
-URI_JUAN = "Real_Imgs"
+URI_BORJA = "Movil"
+URI_JUAN = "Ordenador"
+URI_PATTERNPEQ = "PatternPeq"
 
 VIDEO_BORJA = "VideoMovil.mp4"
 VIDEO_JUAN = "VideoOrdenador.mp4"
+VIDEO_PEQ = "VideoPatternPeq.mp4"
 
-URI = URI_JUAN
+GRID_GRANDE = (9,6)
+GRID_PEQ = (5,4)
+
+OBJPOINTS_GRANDE = np.zeros((9*6,3),np.float32)
+OBJPOINTS_GRANDE[:,:2] = np.mgrid[0:9,0:6].T.reshape(-1,2)
+OBJPOINTS_GRANDE = OBJPOINTS_GRANDE*LONGITUD
+
+OBJPOINTS_PEQ = np.zeros((5*4,3),np.float32)
+OBJPOINTS_PEQ[:,:2] = np.mgrid[0:5,0:4].T.reshape(-1,2)
+OBJPOINTS_PEQ = OBJPOINTS_PEQ*LONGITUD
+
+URI = URI_PATTERNPEQ
 ESCALA = ESCALA_JUAN
-VIDEO = VIDEO_JUAN
-
-OBJPOINTS = np.zeros((9*6,3),np.float32)
-OBJPOINTS[:,:2] = np.mgrid[0:9,0:6].T.reshape(-1,2)
-OBJPOINTS = OBJPOINTS*LONGITUD
+OBJPOINTS = OBJPOINTS_PEQ
+GRID = GRID_PEQ
+VIDEO = VIDEO_PEQ
 
 CRITERIA = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
@@ -81,7 +92,7 @@ def calibrar():
         img = cv2.resize(img, ESCALA)
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        ret, corners = cv2.findChessboardCorners(img_gray, (9,6), None) # Encontrar esquinas del patrón de calibración
+        ret, corners = cv2.findChessboardCorners(img_gray, GRID, None) # Encontrar esquinas del patrón de calibración
         
         if ret:     # Si se ha podido encontrar
             
@@ -280,8 +291,6 @@ def DibujarNombres(img, rvecs_img, tvecs_img, mtx, dist):
     img = cv2.line(img, Pts[1], Pts[2], (0,255,0), 3)
     img = cv2.line(img, Pts[2], Pts[3], (0,255,0), 3)
 
-
-
     return img
 
 
@@ -299,14 +308,15 @@ if __name__ == '__main__':
     while(cap.isOpened()):      # Si se ha abierto correctamente el video
         
         ret, img = cap.read()   # Obtener frame
-        
+        print(img.shape)
+
         if ret:     
             
             img = cv2.resize(img, ESCALA)            
             img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
             inicio_chessboard = time.time()
-            ret, corners = cv2.findChessboardCorners(img_gray, (9,6), None) # Encontrar esquinas del patrón de calibración
+            ret, corners = cv2.findChessboardCorners(img_gray, GRID, None) # Encontrar esquinas del patrón de calibración
             final_chessboard = time.time()
             
             if ret:
