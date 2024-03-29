@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Importar librerías
+# Importar librer?as
 
 import cv2
 import numpy as np
@@ -27,7 +27,7 @@ URI_PATTERNPEQ = "PatternPeq"
 
 VIDEO_BORJA = "VideoMovil.mp4"
 VIDEO_JUAN = "VideoOrdenador.mp4"
-VIDEO_PEQ = "VideoPatternPeq.mp4"
+VIDEO_PEQ = "VideoPatternPeq2.mp4"
 
 GRID_GRANDE = (9,6)
 GRID_PEQ = (5,4)
@@ -48,14 +48,14 @@ VIDEO = VIDEO_PEQ
 
 CRITERIA = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
-# Función para obtener la matriz de rotación en eje z
+# Funci?n para obtener la matriz de rotaci?n en eje z
 
 def Rz(theta):
   return np.matrix([[ math.cos(theta), -math.sin(theta), 0 ],
                    [ math.sin(theta), math.cos(theta) , 0 ],
                    [ 0           , 0            , 1 ]])
 
-# Función para aplicar transformadas a los puntos
+# Funci?n para aplicar transformadas a los puntos
 
 def Transform_Points(points,x,y,z,theta,x_post,y_post,z_post):
     
@@ -71,10 +71,10 @@ def Transform_Points(points,x,y,z,theta,x_post,y_post,z_post):
     
     return tmp_points
 
-# Función para obtener los parámetros intrínsecos de la cámara
+# Funcion para obtener los par?metros intr?nsecos de la c?mara
 
 def calibrar():
-    # Definición de variables
+    # Definicion de variables
     objpoints_array = []
     imgpoints_array = []
     count = 0
@@ -93,24 +93,24 @@ def calibrar():
         img = cv2.resize(img, ESCALA)
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        ret, corners = cv2.findChessboardCorners(img_gray, GRID, None) # Encontrar esquinas del patrón de calibración
+        ret, corners = cv2.findChessboardCorners(img_gray, GRID, None) # Encontrar esquinas del patron de calibraci?n
         
         if ret:     # Si se ha podido encontrar
             
             count+=1
-            objpoints_array.append(OBJPOINTS)   # Añadir información neceria del punto para la calibración
+            objpoints_array.append(OBJPOINTS)   # A?adir informacion neceria del punto para la calibracion
 
             corners2 = cv2.cornerSubPix(img_gray, corners, (11,11), (-1,-1), CRITERIA)
             imgpoints_array.append(corners2)
 
 
-    ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints_array, imgpoints_array, img_gray.shape[::-1], None, None)  # Calibrar cámara
+    ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints_array, imgpoints_array, img_gray.shape[::-1], None, None)  # Calibrar camara
     
     print(f"Numero de imagenes para la calibracion: {count}")
 
     return mtx, dist
 
-    # Función que proyecta los puntos de los nombres y dibuja lineas
+    # Funci?n que proyecta los puntos de los nombres y dibuja lineas
 
 def DibujarNombres(img, rvecs_img, tvecs_img, mtx, dist):   
     
@@ -298,7 +298,7 @@ def DibujarNombres(img, rvecs_img, tvecs_img, mtx, dist):
 
 if __name__ == '__main__':
 
-    mtx, dist = calibrar()  # Calibrar cámara para obtener parámetros intrínsecos 
+    mtx, dist = calibrar()  # Calibrar camara para obtener parametros intrinsecos 
 
     tiempos = []
 
@@ -317,19 +317,19 @@ if __name__ == '__main__':
             img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
             inicio_chessboard = time.time()
-            ret, corners = cv2.findChessboardCorners(img_gray, GRID, None) # Encontrar esquinas del patrón de calibración
+            ret, corners = cv2.findChessboardCorners(img_gray, GRID, None) # Encontrar esquinas del patr?n de calibracion
             final_chessboard = time.time()
             
             if ret:
 
                 inicio_esquinas = time.time()
-                corners2 = cv2.cornerSubPix(img_gray, corners, (11,11), (-1,-1), CRITERIA)  # Refinar esquinas del patrón de calibración
+                corners2 = cv2.cornerSubPix(img_gray, corners, (11,11), (-1,-1), CRITERIA)  # Refinar esquinas del patr?n de calibracion
                 
                 img = cv2.drawChessboardCorners(img, GRID, corners2, ret)      # Dibujar esquinas refinadas
                 final_esquinas = time.time()
 
                 inicio_mtx = time.time()
-                ret, rvecs_img, tvecs_img = cv2.solvePnP(OBJPOINTS, corners2, mtx, dist, True, cv2.SOLVEPNP_ITERATIVE)  # Obtener parámetros extrinsecos
+                ret, rvecs_img, tvecs_img = cv2.solvePnP(OBJPOINTS, corners2, mtx, dist, True, cv2.SOLVEPNP_ITERATIVE)  # Obtener parametros extrinsecos
                 final_mtx = time.time()
 
                 inicio_nombres = time.time()
