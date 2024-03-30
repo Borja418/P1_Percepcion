@@ -28,6 +28,8 @@ URI_PATTERNPEQ = "PatternPeq"
 VIDEO_BORJA = "VideoMovil.mp4"
 VIDEO_JUAN = "VideoOrdenador.mp4"
 VIDEO_PEQ = "VideoPatternPeq2.mp4"
+VIDEO_WEBCAM_RT = 0
+VIDEO_ORDENADOR_RT = 1
 
 GRID_GRANDE = (9,6)
 GRID_PEQ = (5,4)
@@ -48,7 +50,7 @@ VIDEO = VIDEO_PEQ
 
 CRITERIA = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
-# Funci?n para obtener la matriz de rotaci?n en eje z
+# Funci?n para obtener la matriz de rotacion en eje z
 
 def Rz(theta):
   return np.matrix([[ math.cos(theta), -math.sin(theta), 0 ],
@@ -71,7 +73,7 @@ def Transform_Points(points,x,y,z,theta,x_post,y_post,z_post):
     
     return tmp_points
 
-# Funcion para obtener los par?metros intr?nsecos de la c?mara
+# Funcion para obtener los parametros intrinsecos de la camara
 
 def calibrar():
     # Definicion de variables
@@ -317,13 +319,13 @@ if __name__ == '__main__':
             img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
             inicio_chessboard = time.time()
-            ret, corners = cv2.findChessboardCorners(img_gray, GRID, None) # Encontrar esquinas del patr?n de calibracion
+            ret, corners = cv2.findChessboardCorners(img_gray, GRID, None) # Encontrar esquinas del patron de calibracion
             final_chessboard = time.time()
             
             if ret:
 
                 inicio_esquinas = time.time()
-                corners2 = cv2.cornerSubPix(img_gray, corners, (11,11), (-1,-1), CRITERIA)  # Refinar esquinas del patr?n de calibracion
+                corners2 = cv2.cornerSubPix(img_gray, corners, (11,11), (-1,-1), CRITERIA)  # Refinar esquinas del patron de calibracion
                 
                 img = cv2.drawChessboardCorners(img, GRID, corners2, ret)      # Dibujar esquinas refinadas
                 final_esquinas = time.time()
