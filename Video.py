@@ -311,7 +311,6 @@ if __name__ == '__main__':
     while(cap.isOpened()):      # Si se ha abierto correctamente el video
         
         ret, img = cap.read()   # Obtener frame
-        print(img.shape)
 
         if ret:     
             

@@ -75,7 +75,6 @@ def Calibrar(num_img):
             break
             
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints_array, imgpoints_array, img_gray.shape[::-1], None, None)  # Calibrar la cámara
-    print(ret)
     return mtx, dist    # Devolver parámetros intrínsecos
 
 
@@ -132,7 +131,7 @@ def main():
     for num_img_calib in range(1,len(imgs_name)+1): # Cada iteración se añade una imagen más a la calibración
         inicio = time.time()
         mtx, dist = Calibrar(num_img_calib)
-        print(time.time()-inicio)
+        print(f"Tiempo de calibracion: {(time.time()-inicio)*1000}")
         error = Comprobar_Error(mtx, dist)
 
         print(f"El error de calibracion con {num_img_calib} imagenes, es {error}")
